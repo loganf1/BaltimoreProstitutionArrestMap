@@ -1,1 +1,3 @@
 # BaltimoreProstitutionArrestMap
+
+From the Baltimore Police data, the data is filtered to include only and all 1236 prostitution arrests during 2011 and 2012. The arrests are then displayed geographically based on the longitude and latitude of the arrest. Each arrest is color coded and labelled, when hovering over the arrest point on the map, with the district that arrest occured in. The entire area of each district has been colored to help show where these districts are within Baltimore. When you hover over a district, the area is labelled with the district name and the percent of prositution crimes that district has. From the map it is clear that prostition in Baltimore is densely occuring in specific areas and along select roads.
