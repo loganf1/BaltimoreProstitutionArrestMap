@@ -1,0 +1,129 @@
+---
+title: "Project4"
+author: "Logan Fingerhuth"
+date: "May 9, 2019"
+output: html_document
+---
+```{r setup, include=FALSE}
+library(tidyverse)
+library(stringr)
+library(leaflet)
+arrest_tab <- read_csv("http://www.hcbravo.org/IntroDataSci/misc/BPD_Arrests.csv")
+```
+
+```{r load_data, include=TRUE}
+dat <- arrest_tab %>% 
+  filter(!is.na(`Location 1`)  &  !is.na(charge) & !is.na(district)) %>%
+  filter(incidentOffense == "55A-Prostitution") %>%
+  separate(`Location 1`, c("lat","lng"), sep=",") %>%
+  mutate(lat=as.numeric(str_replace(lat, "\\(", ""))) %>%
+  mutate(lng=as.numeric(str_replace(lng, "\\)", "")))
+head(dat)
+```
+
+
+```{r map, include=TRUE}
+district_color <- function(dis) {
+  ifelse(dis == "NORTHERN", "#03F", 
+         ifelse(dis == "CENTRAL", "#000",
+         ifelse(dis == "WESTERN", "#FF0",
+         ifelse(dis == "EASTERN", "#F00",
+         ifelse(dis == "SOUTHERN", "#0FF",
+         ifelse(dis == "NORTHEASTERN", "#F0F",
+         ifelse(dis == "SOUTHEASTERN", "#0F0",
+         ifelse(dis == "NORTHWESTERN", "#F60",
+         ifelse(dis =="SOUTHWESTERN", "#630", "#999")))))))))
+}
+
+district_lookup <- function(dis){
+  num <- dat %>%
+    filter(district == dis) %>% count()
+    paste("District: ",dis, " Percent of Prostitution crime: ", sprintf("%0.2f", (num/1236) * 100), "%")
+}
+
+balto_map <- leaflet(dat) %>%
+  addTiles() %>%
+  setView(lat=39.29, lng=-76.61, zoom=11)
+
+NE_lat = c(39.371805, 39.310435, 39.299836, 39.314228, 39.319515, 39.371541, 39.371805)
+NE_lng = c(-76.529549,-76.529729,-76.548131, -76.582168, -76.605912,-76.592843,-76.529549)
+NE_df <- data.frame(lng = NE_lng, lat = NE_lat, stringsAsFactors = FALSE)
+
+N_lat = c(39.311231,39.319515, 39.371541,39.371531, 39.318147, 39.317259, 39.311231)
+N_lng = c(-76.616558, -76.605912, -76.592843, -76.685441, -76.649221, -76.629437, -76.616558)
+N_df <- data.frame(lng = N_lng, lat = N_lat, stringsAsFactors = FALSE)
+
+NW_lat = c(39.371936, 39.371531, 39.318147, 39.314179, 39.319737, 39.371936)
+NW_lng = c(-76.711270, -76.685441, -76.649221,-76.676547, -76.711029, -76.711270)
+NW_df <- data.frame(lng = NW_lng, lat = NW_lat, stringsAsFactors = FALSE)
+
+SW_lat = c(39.319737, 39.314179, 39.316665, 39.294462, 39.287822, 39.288170, 39.285044, 39.262526, 39.255699, 39.277838, 39.319737 )
+SW_lng = c(-76.711029, -76.676547, -76.659307, -76.664925, -76.655575, -76.646933, -76.649161, -76.647916, -76.659631, -76.711149, -76.711029)
+SW_df <- data.frame(lng = SW_lng, lat = SW_lat, stringsAsFactors = FALSE)
+
+S_lat = c(39.288170,39.285044, 39.262526, 39.255699, 39.234380,39.208190, 39.197274, 39.209597, 39.279464, 39.287477 ,39.288170)
+S_lng = c(-76.646933, -76.649161, -76.647916, -76.659631, -76.611716, -76.583706, -76.549721, -76.530010,-76.587109,-76.622187,-76.646933)
+S_df <- data.frame(lng = S_lng, lat = S_lat, stringsAsFactors = FALSE)
+
+SE_lat = c(39.209597,39.279464, 39.283697,39.294999,39.295436, 39.299836,39.310435, 39.209597)
+SE_lng = c(-76.530010,-76.587109, -76.605565, -76.599861, -76.584950, -76.548131, -76.529729, -76.530010)
+SE_df <- data.frame(lng = SE_lng, lat = SE_lat, stringsAsFactors = FALSE)
+
+E_lat = c(39.319515, 39.311231, 39.293541, 39.286997, 39.283697, 39.294999, 39.295436,  39.299836, 39.314228, 39.319515)
+E_lng = c(-76.605912, -76.616558,-76.610101, -76.604045,-76.605565,-76.599861,-76.584950, -76.548131, -76.582168, -76.605912)
+E_df <- data.frame(lng = E_lng, lat = E_lat, stringsAsFactors = FALSE)
+
+C_lat = c(39.283697, 39.286997, 39.293541, 39.311231, 39.317259, 39.317977, 39.310289, 39.310073, 39.305894, 39.287693, 39.287477 , 39.283697)
+C_lng = c(-76.605565, -76.604045, -76.610101, -76.616558, -76.629437, -76.644508,-76.636946 , -76.642451,-76.637524, -76.628030, -76.622187 ,-76.605565)
+C_df <- data.frame(lng = C_lng, lat = C_lat, stringsAsFactors = FALSE)
+
+W_lat = c(39.317977, 39.310289, 39.310073, 39.305894, 39.287693, 39.287822, 39.294462, 39.316665, 39.318147, 39.317977)
+W_lng = c(-76.644508, -76.636946, -76.642451, -76.637524, -76.628030, -76.655575, -76.664925, -76.659307,-76.649221, -76.644508)
+W_df <- data.frame(lng = W_lng, lat = W_lat, stringsAsFactors = FALSE)
+
+balto_map <- balto_map %>%
+  addPolygons(lng = NE_df$lng, lat = NE_df$lat, stroke = TRUE, color = "#F0F",
+  weight = 5, opacity = 0.2, fillOpacity = .15, label = district_lookup("NORTHEASTERN"), data = NE_df)
+
+balto_map <- balto_map %>%
+  addPolygons(lng = N_df$lng, lat = N_df$lat, stroke = TRUE, color = "#03F",
+ weight = 5, opacity = 0.2, fillOpacity = .15, label = district_lookup("NORTHERN"), data = N_df)
+
+balto_map <- balto_map %>%
+  addPolygons(lng = NW_df$lng, lat = NW_df$lat, stroke = TRUE, color = "#F60",
+  weight = 5, opacity = 0.2, fillOpacity = .15, label = district_lookup("NORTHWESTERN"), data = NW_df)
+
+balto_map <- balto_map %>%
+  addPolygons(lng = SW_df$lng, lat = SW_df$lat, stroke = TRUE, color = "#630",
+  weight = 5, opacity = 0.2, fillOpacity = .15, label = district_lookup("SOUTHWESTERN"), data = SW_df)
+
+balto_map <- balto_map %>%
+  addPolygons(lng = S_df$lng, lat = S_df$lat, stroke = TRUE, color = "#0FF",
+  weight = 5, opacity = 0.2, fillOpacity = .15, label = district_lookup("SOUTHERN"), data = S_df)
+
+balto_map <- balto_map %>%
+  addPolygons(lng = SE_df$lng, lat = SE_df$lat, stroke = TRUE, color = "#0F0",
+  weight = 5, opacity = 0.2, fillOpacity = .15, label = district_lookup("SOUTHEASTERN"), data = SE_df)
+
+balto_map <- balto_map %>%
+  addPolygons(lng = E_df$lng, lat = E_df$lat, stroke = TRUE, color = "#F00",
+  weight = 5, opacity = 0.2, fillOpacity = .15, label = district_lookup("EASTERN"), data = E_df)
+
+balto_map <- balto_map %>%
+  addPolygons(lng = C_df$lng, lat = C_df$lat, stroke = TRUE, color = "#000",
+  weight = 5, opacity = 0.2, fillOpacity = .15, label = district_lookup("CENTRAL"), data = C_df)
+
+balto_map <- balto_map %>%
+  addPolygons(lng = W_df$lng, lat = W_df$lat, stroke = TRUE, color = "#FF0",
+  weight = 5, opacity = 0.2, fillOpacity = .15, label = district_lookup("WESTERN"), data = W_df)
+
+balto_map <- balto_map %>%
+  addCircleMarkers(lng = dat$lng, lat = dat$lat, radius = .6,
+  color = district_color(dat$district), label = dat$district)
+
+balto_map
+```
+## Summary
+
+From the Baltimore Police data, the data is filtered to include only and all 1236 prostitution arrests during 2011 and 2012. The arrests are then displayed geographically based on the longitude and latitude of the arrest. Each arrest is color coded and labelled, when hovering over the arrest point on the map, with the district that arrest occured in. The entire area of each district has been colored to help show where these districts are within Baltimore. When you hover over a district, the area is labelled with the district name and the percent of prositution crimes that district has. From the map it is clear that prostition in Baltimore is densely occuring in specific areas and along select roads.
+
