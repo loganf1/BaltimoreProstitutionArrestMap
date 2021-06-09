@@ -1,5 +1,5 @@
 ---
-title: "Project4"
+title: "Baltimore Prostitution Arrest Map"
 author: "Logan Fingerhuth"
 date: "May 9, 2019"
 output: html_document
